@@ -1,0 +1,44 @@
+services:
+
+  matomo-db:
+    container_name: matomo-db
+    image: ${DOCKERHUB_PROXY:-}library/mariadb:10.11
+    command: --max-allowed-packet=64M
+    environment:
+      - MARIADB_DATABASE=matomo
+      - MARIADB_USER=matomo
+      - MARIADB_PASSWORD=${MATOMO_DB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${MATOMO_DB_ROOT_PASSWORD}
+    volumes:
+      - matomo-db-data:/var/lib/mysql
+    restart: unless-stopped
+
+  matomo:
+    container_name: matomo
+    image: ${DOCKERHUB_PROXY:-}library/matomo:5
+    environment:
+      - MATOMO_DATABASE_HOST=matomo-db
+      - MATOMO_DATABASE_TABLES_PREFIX=matomo_
+      - MATOMO_DATABASE_USERNAME=matomo
+      - MATOMO_DATABASE_PASSWORD=${MATOMO_DB_PASSWORD}
+      - MATOMO_DATABASE_DBNAME=matomo
+    volumes:
+      - matomo-data:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matomo.rule=Host(`matomo.${DEVBOX_HOSTNAME}`)"
+      - "traefik.http.services.matomo.loadbalancer.server.port=80"
+    depends_on:
+      - matomo-db
+    restart: unless-stopped
+
+volumes:
+  matomo-db-data:
+    name: matomo-db-data
+  matomo-data:
+    name: matomo-data
+
+networks:
+  default:
+    name: devbox
+    external: true

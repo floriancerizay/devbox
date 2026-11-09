@@ -1,0 +1,2 @@
+.env
+traefik/config/conf.d/tls.yaml

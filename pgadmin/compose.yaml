@@ -1,0 +1,28 @@
+services:
+
+  pgadmin:
+    container_name: pgadmin
+    image: ${DOCKERHUB_PROXY:-}dpage/pgadmin4:9
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+      # pas de login ni de mot de passe maître (usage local uniquement)
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.${DEVBOX_HOSTNAME}`)"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=8080"
+    restart: unless-stopped
+
+volumes:
+  pgadmin-data:
+    name: pgadmin-data
+
+networks:
+  default:
+    name: devbox
+    external: true

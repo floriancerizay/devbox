@@ -1,0 +1,7 @@
+# Certificat par défaut généré par mkcert/generate.sh (copié dans le volume traefik-certs)
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/default.pem
+        keyFile: /certs/default-key.pem

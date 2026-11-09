@@ -1,0 +1,59 @@
+services:
+
+  opensearch:
+    container_name: opensearch
+    image: ${DOCKERHUB_PROXY:-}opensearchproject/opensearch:3.2.0
+    environment:
+      - cluster.name=gpu-site-opensearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "${DEVBOX_PORT_PREFIX}${OPENSEARCH_PORT:-9200}:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s'"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.os.rule=Host(`os.${DEVBOX_HOSTNAME}`)"
+      - "traefik.http.services.os.loadbalancer.server.port=9200"
+    restart: unless-stopped
+
+  opensearch-dashboards:
+    container_name: opensearch-dashboards
+    image: ${DOCKERHUB_PROXY:-}opensearchproject/opensearch-dashboards:3.2.0
+    profiles: ["dashboards"]
+    environment:
+      - 'OPENSEARCH_HOSTS=["http://opensearch:9200"]'
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.os-dashboard.rule=Host(`os-dashboard.${DEVBOX_HOSTNAME}`)"
+      - "traefik.http.services.os-dashboard.loadbalancer.server.port=5601"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  opensearch-data:
+    name: opensearch-data
+
+networks:
+  default:
+    name: devbox
+    external: true

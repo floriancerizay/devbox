@@ -1,0 +1,24 @@
+services:
+
+  redis:
+    container_name: redis
+    image: ${DOCKERHUB_PROXY:-}library/redis:7.4-alpine
+    ports:
+      - "${DEVBOX_PORT_PREFIX}${REDIS_PORT:-6379}:6379"
+    # Configuration alignée sur deploiement/values.yaml (redisServer)
+    command: >
+      redis-server --appendonly yes --save ""
+      --maxmemory 384mb --maxmemory-policy volatile-lru
+      --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+    name: redis-data
+
+networks:
+  default:
+    name: devbox
+    external: true

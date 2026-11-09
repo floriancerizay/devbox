@@ -1,0 +1,29 @@
+# Redmine utilise la base "redmine" du conteneur postgis (voir postgis/create-databases.sh)
+services:
+
+  redmine:
+    container_name: redmine
+    image: ${DOCKERHUB_PROXY:-}library/redmine:6
+    environment:
+      - REDMINE_DB_POSTGRES=postgis
+      - REDMINE_DB_PORT=5432
+      - REDMINE_DB_USERNAME=${POSTGRES_USER}
+      - REDMINE_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - REDMINE_DB_DATABASE=${REDMINE_DB}
+      - REDMINE_SECRET_KEY_BASE=${REDMINE_SECRET_KEY_BASE}
+    volumes:
+      - redmine-files:/usr/src/redmine/files
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redmine.rule=Host(`redmine.${DEVBOX_HOSTNAME}`)"
+      - "traefik.http.services.redmine.loadbalancer.server.port=3000"
+    restart: unless-stopped
+
+volumes:
+  redmine-files:
+    name: redmine-files
+
+networks:
+  default:
+    name: devbox
+    external: true

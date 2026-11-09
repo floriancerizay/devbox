@@ -1,0 +1,33 @@
+services:
+
+  portainer:
+    container_name: portainer
+    image: ${DOCKERHUB_PROXY:-}portainer/portainer-ce:lts
+    # compte "admin" créé à l'initialisation (volume vide), plus de timeout de 5 min
+    command: --admin-password-file /run/portainer-admin -H unix:///var/run/docker.sock
+    configs:
+      - source: portainer-admin
+        target: /run/portainer-admin
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${DEVBOX_HOSTNAME}`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+    # le userns-remap (installation docker IGN) empêche de lire le socket docker
+    userns_mode: 'host'
+    restart: unless-stopped
+
+configs:
+  portainer-admin:
+    content: ${PORTAINER_ADMIN_PASSWORD}
+
+volumes:
+  portainer-data:
+    name: portainer-data
+
+networks:
+  default:
+    name: devbox
+    external: true
