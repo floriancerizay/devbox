@@ -84,3 +84,7 @@ Depuis l'hôte : `127.0.0.1`, postgis sur le port **5433** (`POSTGIS_PORT`), red
 | postgis pas healthy | `./devbox.sh logs postgis` ; en dernier recours `./devbox.sh reset postgis`. |
 | Avertissement de certificat | Normal sans mkcert (voir ci-dessus). Pour le retirer : `mkcert -uninstall`. |
 | Portainer / traefik ne lisent pas le socket docker | Installation docker avec `userns-remap` : déjà géré par `userns_mode: host`. |
+
+## Contrôles qualité
+
+`make lint` lance shellcheck (scripts), yamllint (YAML) et la validation des fichiers compose. Prérequis : `sudo apt install shellcheck yamllint`. Même contrôle en CI (`.github/workflows/lint.yaml`).

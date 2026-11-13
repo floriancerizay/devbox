@@ -17,15 +17,15 @@ fi
 echo "Generate certificate for DEVBOX_HOSTNAME=${DEVBOX_HOSTNAME}..."
 
 mkcert \
-    -key-file ${SCRIPT_DIR}/default-key.pem \
-    -cert-file ${SCRIPT_DIR}/default.pem \
-    "*.${DEVBOX_HOSTNAME}" ${DEVBOX_HOSTNAME} localhost
+    -key-file "${SCRIPT_DIR}"/default-key.pem \
+    -cert-file "${SCRIPT_DIR}"/default.pem \
+    "*.${DEVBOX_HOSTNAME}" "${DEVBOX_HOSTNAME}" localhost
 
 echo "Copy default.pem to traefik:/certs/default-key.pem ..."
-docker cp ${SCRIPT_DIR}/default.pem traefik:/certs/default.pem
+docker cp "${SCRIPT_DIR}"/default.pem traefik:/certs/default.pem
 echo "Copy default-key.pem to traefik:/certs/default-key.pem ..."
-docker cp ${SCRIPT_DIR}/default-key.pem traefik:/certs/default-key.pem
+docker cp "${SCRIPT_DIR}"/default-key.pem traefik:/certs/default-key.pem
 echo "Activate certificate in traefik config ..."
-cp ${SCRIPT_DIR}/tls.yaml.dist ${SCRIPT_DIR}/../config/conf.d/tls.yaml
+cp "${SCRIPT_DIR}"/tls.yaml.dist "${SCRIPT_DIR}"/../config/conf.d/tls.yaml
 echo "Restart traefik ..."
 docker restart traefik

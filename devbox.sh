@@ -66,7 +66,7 @@ case "$CMD" in
     read -r -p "Confirmer ? [y/N] " ok
     [[ "$ok" =~ ^[yYoO]$ ]] || { echo "Annulé"; exit 1; }
     for s in $SERVICES; do compose "$s" --profile "*" down -v; done ;;
-  down) for s in $(echo $SERVICES | tr ' ' '\n' | tac); do compose "$s" down; done ;;
+  down) for s in $(echo "$SERVICES" | tr ' ' '\n' | tac); do compose "$s" down; done ;;
   logs)
     if [ "$#" -ne 1 ]; then echo "logs : indiquer un seul service (ex : ./devbox.sh logs redmine)"; exit 1; fi
     compose "$1" logs -f --tail 50 ;;
