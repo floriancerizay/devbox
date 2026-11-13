@@ -34,6 +34,26 @@ Traefik publie les ports **8080 (HTTP) / 8443 (HTTPS)** car apache2 occupe 80/44
 `*.localhost` est résolu en local par les navigateurs et systemd-resolved. HTTPS (optionnel) :
 `mkcert -install && bash traefik/mkcert/generate.sh`.
 
+## Identifiants par défaut
+
+Les mots de passe sont ceux de `.env` (valeurs `ChangeIt` dans `.env.dist`).
+
+| Service | Identifiant | Mot de passe |
+|---|---|---|
+| portainer | `admin` | `PORTAINER_ADMIN_PASSWORD` |
+| keycloak | `KEYCLOAK_ADMIN` | `KEYCLOAK_ADMIN_PASSWORD` |
+| geoserver | `GEOSERVER_ADMIN_USER` | `GEOSERVER_ADMIN_PASSWORD` |
+| redmine | `admin` | `admin` (à changer au premier login) |
+| postgis | `POSTGRES_USER` | `POSTGRES_PASSWORD` |
+| redis | – | `REDIS_PASSWORD` |
+| pgadmin, opensearch | aucun | aucun |
+
+## Mémoire utilisée
+
+Mesure au repos, tous services démarrés : environ **3 Go** (opensearch ~1,3 Go, geoserver ~0,6 Go,
+keycloak ~0,4 Go, les autres moins de 150 Mo chacun). Pour économiser, démarrer seulement
+`./devbox.sh up core`.
+
 ## Utilisation avec gpu-site
 
 Depuis un conteneur sur le réseau `devbox` (ajouter `networks: default: {name: devbox, external: true}`
@@ -53,3 +73,14 @@ Depuis l'hôte : `127.0.0.1`, postgis sur le port **5433** (`POSTGIS_PORT`), red
 * Redmine : créer le projet défini par `redmine.project` (`pole-assistance-gpu-dev`) pour gpu-site.
 * Matomo en HTTP derrière traefik : si besoin, ajouter `trusted_hosts[]` / `force_ssl` dans `config.ini.php`.
 * Volumes nommés : `./devbox.sh reset <service>` pour repartir de zéro (ou `docker volume ls` / `docker volume rm`).
+
+## Dépannage
+
+| Problème | Solution |
+|---|---|
+| Port déjà utilisé | Changer le port dans `.env` (`TRAEFIK_HTTPS_PORT`, `POSTGIS_PORT`, ...) puis relancer `up`. |
+| opensearch s'arrête au démarrage | `sudo sysctl -w vm.max_map_count=262144` |
+| `*.dev.localhost` ne répond pas | Vérifier que traefik tourne (`./devbox.sh ps traefik`) et utiliser le port `8443`. |
+| postgis pas healthy | `./devbox.sh logs postgis` ; en dernier recours `./devbox.sh reset postgis`. |
+| Avertissement de certificat | Normal sans mkcert (voir ci-dessus). Pour le retirer : `mkcert -uninstall`. |
+| Portainer / traefik ne lisent pas le socket docker | Installation docker avec `userns-remap` : déjà géré par `userns_mode: host`. |
