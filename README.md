@@ -23,10 +23,11 @@ un réseau docker partagé `devbox` et [traefik](traefik) pour exposer les UI en
 cp .env.dist .env        # adapter les mots de passe, DOCKERHUB_PROXY (miroir IGN)
 ./devbox.sh up           # tous les services (traefik, postgis + création des bases, ...)
 ./devbox.sh up postgis redis opensearch   # ou seulement certains services
-./devbox.sh ps | logs redmine | down
+./devbox.sh ps | down
+./devbox.sh logs redmine   # un seul service à la fois
 ```
 
-Traefik publie les ports **8080 (HTTP) / 8443 (HTTPS)** car apache2 occupe 80/443 sur l'hôte (`TRAEFIK_HTTP_PORT` / `TRAEFIK_HTTPS_PORT` dans `.env` ; 80/443 si libres, ce qui retire le port des URLs). Sans mkcert, traefik sert un certificat auto-signé.
+Traefik publie les ports **8080 (HTTP) / 8443 (HTTPS)** car apache2 occupe 80/443 sur l'hôte (`TRAEFIK_HTTP_PORT` / `TRAEFIK_HTTPS_PORT` dans `.env` ; 80/443 si libres, ce qui retire le port des URLs). Les ports de traefik sont liés à `127.0.0.1` (`DEVBOX_PORT_PREFIX`) : vider cette variable pour exposer le devbox sur le réseau. `up` démarre automatiquement postgis pour pgadmin, keycloak et redmine. Sans mkcert, traefik sert un certificat auto-signé.
 
 `*.localhost` est résolu en local par les navigateurs et systemd-resolved. HTTPS (optionnel) :
 `mkcert -install && bash traefik/mkcert/generate.sh`.
