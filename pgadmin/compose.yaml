@@ -2,7 +2,7 @@ services:
 
   pgadmin:
     container_name: pgadmin
-    image: ${DOCKERHUB_PROXY:-}dpage/pgadmin4:9
+    image: ${DOCKERHUB_PROXY:-}${PGADMIN_IMAGE:-dpage/pgadmin4:9.19}
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}

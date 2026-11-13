@@ -2,7 +2,7 @@ services:
 
   matomo-db:
     container_name: matomo-db
-    image: ${DOCKERHUB_PROXY:-}library/mariadb:10.11
+    image: ${DOCKERHUB_PROXY:-}${MATOMO_DB_IMAGE:-library/mariadb:10.11.19}
     command: --max-allowed-packet=64M
     environment:
       - MARIADB_DATABASE=matomo
@@ -21,7 +21,7 @@ services:
 
   matomo:
     container_name: matomo
-    image: ${DOCKERHUB_PROXY:-}library/matomo:5
+    image: ${DOCKERHUB_PROXY:-}${MATOMO_IMAGE:-library/matomo:5.14.2}
     environment:
       - MATOMO_DATABASE_HOST=matomo-db
       - MATOMO_DATABASE_TABLES_PREFIX=matomo_

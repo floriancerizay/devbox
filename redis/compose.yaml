@@ -2,7 +2,7 @@ services:
 
   redis:
     container_name: redis
-    image: ${DOCKERHUB_PROXY:-}library/redis:7.4-alpine
+    image: ${DOCKERHUB_PROXY:-}${REDIS_IMAGE:-library/redis:7.4.12-alpine}
     ports:
       - "${DEVBOX_PORT_PREFIX}${REDIS_PORT:-6379}:6379"
     # Configuration alignée sur deploiement/values.yaml (redisServer)

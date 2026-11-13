@@ -2,7 +2,7 @@ services:
 
   opensearch:
     container_name: opensearch
-    image: ${DOCKERHUB_PROXY:-}opensearchproject/opensearch:3.2.0
+    image: ${DOCKERHUB_PROXY:-}${OPENSEARCH_IMAGE:-opensearchproject/opensearch:3.2.0}
     environment:
       - cluster.name=gpu-site-opensearch
       - discovery.type=single-node
@@ -35,7 +35,7 @@ services:
 
   opensearch-dashboards:
     container_name: opensearch-dashboards
-    image: ${DOCKERHUB_PROXY:-}opensearchproject/opensearch-dashboards:3.2.0
+    image: ${DOCKERHUB_PROXY:-}${OPENSEARCH_DASHBOARDS_IMAGE:-opensearchproject/opensearch-dashboards:3.2.0}
     profiles: ["dashboards"]
     environment:
       - 'OPENSEARCH_HOSTS=["http://opensearch:9200"]'

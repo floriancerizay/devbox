@@ -3,7 +3,7 @@ services:
 
   keycloak:
     container_name: keycloak
-    image: ${KEYCLOAK_IMAGE:-quay.io/keycloak/keycloak:26.4}
+    image: ${KEYCLOAK_IMAGE:-quay.io/keycloak/keycloak:26.4.7}
     # https://www.keycloak.org/server/reverseproxy
     command: start-dev --proxy-headers xforwarded --http-enabled=true
     environment:

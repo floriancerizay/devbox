@@ -2,7 +2,7 @@ services:
 
   portainer:
     container_name: portainer
-    image: ${DOCKERHUB_PROXY:-}portainer/portainer-ce:lts
+    image: ${DOCKERHUB_PROXY:-}${PORTAINER_IMAGE:-portainer/portainer-ce:2.45.3}
     # compte "admin" créé à l'initialisation (volume vide), plus de timeout de 5 min
     command: --admin-password-file /run/portainer-admin -H unix:///var/run/docker.sock
     configs:

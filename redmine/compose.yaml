@@ -3,7 +3,7 @@ services:
 
   redmine:
     container_name: redmine
-    image: ${DOCKERHUB_PROXY:-}library/redmine:6
+    image: ${DOCKERHUB_PROXY:-}${REDMINE_IMAGE:-library/redmine:6.1.6}
     environment:
       - REDMINE_DB_POSTGRES=postgis
       - REDMINE_DB_PORT=5432
