@@ -23,7 +23,9 @@ un réseau docker partagé `devbox` et [traefik](traefik) pour exposer les UI en
 cp .env.dist .env        # adapter les mots de passe, DOCKERHUB_PROXY (miroir IGN)
 ./devbox.sh up           # tous les services (traefik, postgis + création des bases, ...)
 ./devbox.sh up postgis redis opensearch   # ou seulement certains services
-./devbox.sh ps | down
+./devbox.sh up core      # groupe minimal : traefik postgis redis opensearch
+./devbox.sh ps | down | restart redmine | pull
+./devbox.sh reset redmine   # supprime conteneur + volumes (confirmation demandée)
 ./devbox.sh logs redmine   # un seul service à la fois
 ```
 
@@ -50,4 +52,4 @@ Depuis l'hôte : `127.0.0.1`, postgis sur le port **5433** (`POSTGIS_PORT`), red
 * Proxy sortant IGN : renseigner `DOCKERHUB_PROXY` (avec `/` final) pour tirer les images via le miroir.
 * Redmine : créer le projet défini par `redmine.project` (`pole-assistance-gpu-dev`) pour gpu-site.
 * Matomo en HTTP derrière traefik : si besoin, ajouter `trusted_hosts[]` / `force_ssl` dans `config.ini.php`.
-* Volumes nommés : `docker volume ls`, supprimer avec `docker volume rm` pour repartir de zéro.
+* Volumes nommés : `./devbox.sh reset <service>` pour repartir de zéro (ou `docker volume ls` / `docker volume rm`).

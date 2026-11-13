@@ -1,6 +1,7 @@
 #!/bin/bash
 # Pilotage des stacks du devbox GPU.
-# Usage : ./devbox.sh <up|down|logs|ps> [service...]   (sans service : tous)
+# Usage : ./devbox.sh <up|down|restart|pull|logs|ps|reset> [service...]
+#   sans service : tous (reset exige un service) ; "core" = traefik postgis redis opensearch
 set -e
 ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 [ -f "$ROOT/.env" ] || { echo "Créer .env : cp .env.dist .env"; exit 1; }
@@ -10,8 +11,16 @@ ALL="traefik portainer postgis pgadmin redis opensearch keycloak redmine matomo 
 # Services qui ont besoin de la base postgis
 NEEDS_POSTGIS=" pgadmin keycloak redmine "
 POSTGIS_TIMEOUT=120
+CORE="traefik postgis redis opensearch"
 CMD="${1:-up}"; shift || true
-SERVICES="${*:-$ALL}"
+ARGS="${*:-$ALL}"
+# Développe les groupes (core) en liste de services
+SERVICES=""
+for a in $ARGS; do
+  [ "$a" = "core" ] && a="$CORE"
+  SERVICES="$SERVICES $a"
+done
+SERVICES="${SERVICES# }"
 
 for s in $SERVICES; do
   [ -f "$ROOT/$s/compose.yaml" ] || { echo "Service inconnu : $s (disponibles : $ALL)"; exit 1; }
@@ -47,10 +56,20 @@ case "$CMD" in
       if [ "$s" = "postgis" ] || [[ "$NEEDS_POSTGIS" == *" $s "* ]]; then ensure_postgis; fi
       [ "$s" = "postgis" ] || compose "$s" up -d
     done ;;
+  restart) for s in $SERVICES; do compose "$s" restart; done ;;
+  pull) for s in $SERVICES; do compose "$s" pull; done ;;
+  reset)
+    # Supprime conteneurs ET volumes nommés : repart de zéro
+    if [ "$#" -eq 0 ]; then echo "reset : indiquer le(s) service(s) à réinitialiser"; exit 1; fi
+    echo "Conteneurs et volumes qui seront supprimés pour : $SERVICES"
+    [[ " $SERVICES " == *" postgis "* ]] && echo "(postgis : les bases gpu-site, redmine et keycloak seront perdues)"
+    read -r -p "Confirmer ? [y/N] " ok
+    [[ "$ok" =~ ^[yYoO]$ ]] || { echo "Annulé"; exit 1; }
+    for s in $SERVICES; do compose "$s" --profile "*" down -v; done ;;
   down) for s in $(echo $SERVICES | tr ' ' '\n' | tac); do compose "$s" down; done ;;
   logs)
     if [ "$#" -ne 1 ]; then echo "logs : indiquer un seul service (ex : ./devbox.sh logs redmine)"; exit 1; fi
     compose "$1" logs -f --tail 50 ;;
   ps)   for s in $SERVICES; do compose "$s" ps; done ;;
-  *) echo "Usage : $0 <up|down|logs|ps> [service...]"; exit 1 ;;
+  *) echo "Usage : $0 <up|down|restart|pull|logs|ps|reset> [service...]"; exit 1 ;;
 esac
